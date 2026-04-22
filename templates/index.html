@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Qwen vs Llama 开源模型对比看板</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Qwen / Llama 开源模型多源聚合看板</h1>
+      <p class="subtitle">
+        一键聚合 Hugging Face + ModelScope 数据，对 Qwen 和 Llama 系列做统计与可视化对比。
+      </p>
+
+      <section class="toolbar">
+        <button id="refreshBtn">一键拉取并分析</button>
+        <span id="status">等待拉取数据...</span>
+      </section>
+
+      <section>
+        <h2>汇总统计</h2>
+        <table id="summaryTable">
+          <thead>
+            <tr>
+              <th>平台</th>
+              <th>系列</th>
+              <th>模型数量</th>
+              <th>总下载量</th>
+              <th>平均下载量</th>
+              <th>总点赞数</th>
+              <th>平均点赞数</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="charts">
+        <div>
+          <h2>下载量对比（系列 x 平台）</h2>
+          <div id="downloadsChart"></div>
+        </div>
+        <div>
+          <h2>点赞量对比（系列 x 平台）</h2>
+          <div id="likesChart"></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Top 12 下载模型</h2>
+        <table id="topDownloadsTable">
+          <thead>
+            <tr>
+              <th>模型</th>
+              <th>平台</th>
+              <th>系列</th>
+              <th>下载量</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Top 12 点赞模型</h2>
+        <table id="topLikesTable">
+          <thead>
+            <tr>
+              <th>模型</th>
+              <th>平台</th>
+              <th>系列</th>
+              <th>点赞数</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>原始模型明细（可导出改造）</h2>
+        <p>当前总记录：<span id="recordCount">0</span></p>
+        <pre id="errors"></pre>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
