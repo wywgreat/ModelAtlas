@@ -1,78 +1,40 @@
-# ModelAtlas: Qwen vs Llama 对比网页
+# 开源模型影响力仪表盘
 
-这是一个可本地运行的一键聚合看板：从 **Hugging Face** 和 **ModelScope（魔搭）** 拉取 `Qwen` 与 `Llama` 相关开源模型数据，并生成多维统计表与图表。
+一个无依赖的静态网站，用 Hugging Face Hub API 实时获取 Qwen、DeepSeek、OpenAI、Llama / Meta、GLM / Zhipu、MiniMax 官方生成式大语言模型和多模态模型的下载数据。
 
-## 功能
+## 使用
 
-- 一键拉取两大平台数据（后端接口：`/api/models/refresh`）
-- 自动聚合统计：模型数量、总下载、平均下载、总点赞、平均点赞
-- Top 模型排行（下载 / 点赞）
-- 可视化柱状图对比（平台 × 系列）
-- 页面显示抓取错误，便于后续优化 API 兼容
-
-## 本地运行
+本地服务器已经可以用下面的命令启动：
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python app.py
+python3 -m http.server 5173
 ```
 
-打开浏览器访问：`http://127.0.0.1:5000`
-
-## 目录结构
+浏览器打开：
 
 ```text
-.
-├── app.py
-├── requirements.txt
-├── static/
-│   ├── app.js
-│   └── style.css
-└── templates/
-    └── index.html
+http://localhost:5173/
 ```
 
-## 阿里云 ECS 部署建议
+点击页面右上角的“数据更新”，会重新请求 Hugging Face 并刷新所有图表。最近一次成功结果会缓存在浏览器 `localStorage` 中，页面重新打开时会先展示缓存，再尝试刷新。
 
-### 1) 基础环境
+## 数据口径
 
-- Ubuntu 22.04 / CentOS 7+
-- Python 3.10+
-- Nginx
+- `downloadsAllTime`：模型自创建以来的累计下载量。
+- `downloads`：Hugging Face 当前返回的近 30 天下载量。
+- 模型范围：默认只统计各公司官方 Hugging Face 组织下的公开模型。
+- 类型范围：保留生成式大语言模型与生成式多模态模型；过滤 CLIP、SigLIP、ViT、embedding、reranker、encoder-only、分类/检测/分割等组件型模型。
+- GLM 范围：从 `THUDM`、`zai-org` 中筛选名称或标签包含 `glm/chatglm` 的模型，避免混入同组织下其它系列。
+- 参考：[Hugging Face `ModelInfo`](https://huggingface.co/docs/huggingface_hub/package_reference/hf_api#huggingface_hub.hf_api.ModelInfo) 文档说明了 `downloads` 和 `downloads_all_time` 字段；下载计数规则见 [Models Download Stats](https://huggingface.co/docs/hub/models-download-stats)。
 
-### 2) 生产启动（Gunicorn）
+## 影响力指标
 
-```bash
-pip install gunicorn
-gunicorn -w 2 -b 0.0.0.0:5000 app:app
-```
+- 累计下载量：长期采用规模。
+- 近 30 天下载量：近期热度和动量。
+- 综合影响力指数：累计下载、近期下载、模型数量、点赞数的加权评分。
+- 头部集中度：Top 5 模型下载量占比，用来判断影响力是否集中在少数爆款。
+- 年度发布节奏：按模型创建年份观察各家的开源节奏。
 
-### 3) Nginx 反向代理示例
+## 调整公司或账号
 
-```nginx
-server {
-    listen 80;
-    server_name your-domain-or-ip;
-
-    location / {
-        proxy_pass http://127.0.0.1:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-### 4) 开机自启（systemd）
-
-可将 gunicorn 包装为 systemd service（建议在 `/etc/systemd/system/modelatlas.service`），并开启 `restart=always`。
-
-## 后续增强建议
-
-- 加缓存层（Redis）降低 API 压力
-- 增加筛选器（许可证、任务类型、时间区间）
-- 增加 CSV / Excel 导出
-- 增加细粒度模型详情页
+修改 [app.js](./app.js) 顶部的 `COMPANIES` 配置即可添加或调整 Hugging Face 组织账号。

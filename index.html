@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>开源模型影响力仪表盘</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar" aria-label="仪表盘顶部">
+        <div>
+          <p class="eyebrow">Hugging Face Open Model Analytics</p>
+          <h1>开源模型影响力仪表盘</h1>
+          <p class="subtitle">
+            跟踪 Qwen、DeepSeek、OpenAI、Llama、GLM、MiniMax 在 Hugging Face 上的生成式大语言与多模态模型下载、热度与组合影响力。
+          </p>
+        </div>
+        <div class="toolbar">
+          <button class="icon-button" id="refreshButton" type="button" title="重新获取 Hugging Face 最新数据">
+            <span aria-hidden="true">↻</span>
+            <span>数据更新</span>
+          </button>
+          <button class="ghost-button" id="exportButton" type="button" title="导出当前模型明细 CSV">
+            <span aria-hidden="true">⇩</span>
+            <span>导出 CSV</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="status-strip" aria-live="polite">
+        <div>
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">准备获取数据</span>
+        </div>
+        <div id="lastUpdated">尚未更新</div>
+      </section>
+
+      <section class="summary-grid" id="summaryGrid" aria-label="核心指标"></section>
+
+      <section class="dashboard-grid">
+        <article class="panel panel-wide">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Company Impact</p>
+              <h2>累计下载量对比</h2>
+            </div>
+            <p class="panel-note">已过滤 CLIP、embedding、reranker、encoder-only 等非生成式基础模型。</p>
+          </div>
+          <div class="chart-area" id="allTimeChart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Momentum</p>
+              <h2>近 30 天热度</h2>
+            </div>
+          </div>
+          <div class="chart-area compact" id="recentChart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Influence Score</p>
+              <h2>综合影响力指数</h2>
+            </div>
+          </div>
+          <div class="chart-area compact" id="scoreChart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Portfolio Shape</p>
+              <h2>头部集中度</h2>
+            </div>
+          </div>
+          <div class="chart-area compact" id="concentrationChart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Release Timeline</p>
+              <h2>年度发布节奏</h2>
+            </div>
+          </div>
+          <div class="chart-area compact" id="timelineChart"></div>
+        </article>
+
+        <article class="panel panel-wide">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Model Leaderboard</p>
+              <h2>模型下载榜</h2>
+            </div>
+            <div class="table-controls">
+              <label>
+                <span>公司</span>
+                <select id="companyFilter">
+                  <option value="all">全部</option>
+                </select>
+              </label>
+              <label>
+                <span>排序</span>
+                <select id="sortSelect">
+                  <option value="allTime">累计下载</option>
+                  <option value="recent">近 30 天</option>
+                  <option value="likes">点赞数</option>
+                  <option value="createdAt">发布时间</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>模型</th>
+                  <th>公司</th>
+                  <th>任务</th>
+                  <th>累计下载</th>
+                  <th>近 30 天</th>
+                  <th>点赞</th>
+                  <th>创建时间</th>
+                </tr>
+              </thead>
+              <tbody id="modelTable"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel panel-wide">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Analysis Ideas</p>
+              <h2>影响力分析思路</h2>
+            </div>
+          </div>
+          <div class="idea-grid">
+            <div>
+              <h3>下载影响力</h3>
+              <p>用累计下载量看长期采用规模，用近 30 天下载量看近期增速。两者差异可以识别“经典基础模型”和“正在升温的新模型”。</p>
+            </div>
+            <div>
+              <h3>组合健康度</h3>
+              <p>观察模型数量、头部模型占比、Top 5 占比。影响力过度集中时，说明品牌热度可能依赖少数爆款；长尾更厚则表示生态更宽。</p>
+            </div>
+            <div>
+              <h3>发布节奏</h3>
+              <p>按创建年份统计模型数量，再叠加下载量，可以看到企业何时进入开源节奏，以及哪些发布周期真正形成了采用。</p>
+            </div>
+            <div>
+              <h3>社区信号</h3>
+              <p>点赞数、下载数、模型任务类型一起看：下载高但点赞低可能偏工具型；点赞高且下载高通常说明社区讨论度和实际使用都较强。</p>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <template id="emptyStateTemplate">
+      <div class="empty-state">
+        <strong>暂无数据</strong>
+        <span>点击“数据更新”开始获取 Hugging Face 最新模型数据。</span>
+      </div>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
